@@ -48,7 +48,7 @@ numeric_cols = df.select_dtypes(include='number').columns
 correlations = df[numeric_cols].corr()
 
 # Print correlations with t_win (top 25)
-# print(correlations["t_win"].apply(abs).sort_values(ascending=False).iloc[:25])
+print(correlations["t_win"].apply(abs).sort_values(ascending=False).iloc[:25])
 
 selected_col = []
 
@@ -62,14 +62,14 @@ df_selected = df[selected_col]
 # print(df_selected)
 
 
-# plt.figure(figsize=(18,12))
-# sns.heatmap(df_selected.corr().sort_values(by="t_win"), annot=True, cmap="YlGnBu")
-# plt.show()
+plt.figure(figsize=(18,12))
+sns.heatmap(df_selected.corr().sort_values(by="t_win"), annot=True, cmap="YlGnBu")
+plt.show()
 
-# df_selected.hist(figsize=(18,12))
-# plt.show()
+df_selected.hist(figsize=(18,12))
+plt.show()
 
-# df_selected.info()
+df_selected.info()
 
 #Train - Test
 
@@ -83,27 +83,27 @@ x_train_scaled = scaler.fit_transform(X_train)
 x_test_scaled = scaler.transform(X_test)
 
 
+param_grid = {
+     "n_neighbors": list(range(5, 17, 2)), 
+     "weights": ["uniform", "distance"]
+}
 
-# param_grid = {
-#      "n_neighbors": list(range(5, 17, 2)), 
-#      "weights": ["uniform", "distance"]
-# }
+knn = KNeighborsClassifier(n_jobs=4)
+knn.fit(x_train_scaled, y_train)
 
-# knn = KNeighborsClassifier(n_jobs=4)
-# knn.fit(x_train_scaled, y_train)
+clf = RandomizedSearchCV(knn, param_grid, n_jobs=4, n_iter=3, verbose=2, cv=3)
+clf.fit(x_train_scaled, y_train)
+knn = clf.best_estimator_
 
-# clf = RandomizedSearchCV(knn, param_grid, n_jobs=4, n_iter=3, verbose=2, cv=3)
-# clf.fit(x_train_scaled, y_train)
-# knn = clf.best_estimator_
-
-# score = knn.score(x_test_scaled, y_test)
+score = knn.score(x_test_scaled, y_test)
 
 
-# #Random forest classifier
-# forest = RandomForestClassifier(n_jobs=4)
-# # forest.fit(x_train_scaled, y_train)
-# score = forest.score(x_test_scaled, y_test)
-# print(score)
+#Random forest classifier
+
+forest = RandomForestClassifier(n_jobs=4)
+forest.fit(x_train_scaled, y_train)
+score = forest.score(x_test_scaled, y_test)
+print(score)
 
 #tensorflow
 
