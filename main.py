@@ -1,5 +1,7 @@
 import requests
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn
 
 url = "https://www.openml.org/data/download/22102255/dataset"
 
@@ -23,7 +25,6 @@ with open("dataset.txt", "r") as f:
                col.append(line.split(" ")[1])
 # print(col)
 
-
 with open("df.csv", "w") as f:
      f.write(",".join(col))
      f.write("\n")
@@ -31,5 +32,13 @@ with open("df.csv", "w") as f:
 
 df = pd.read_csv("df.csv")
 df.columns = col
-print(df)
 
+#Categorize to binary
+df['t_win'] = df.round_winner.astype('category').cat.codes
+
+# Select only numeric columns for correlation calculation
+numeric_cols = df.select_dtypes(include='number').columns
+correlations = df[numeric_cols].corr()
+
+# Print correlations with t_win
+print(correlations["t_win"].apply(abs).sort_values(ascending=False).iloc[:25])
